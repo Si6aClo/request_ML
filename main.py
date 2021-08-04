@@ -2,8 +2,7 @@ import requests
 import json
 
 url = "https://api.aicloud.sbercloud.ru/public/v2/auth"
-url_predict = "https://api.aicloud.sbercloud.ru/public/v2/inference/v1/predict/kfserving-1628088658/kfserving" \
-              "-1628088658/ "
+url_predict = "https://api.aicloud.sbercloud.ru/public/v2/inference/v1/predict/kfserving-1628088658/kfserving-1628088658/"
 
 api_key = 'cf0dede4-c3a2-421e-a848-f96ab2605d41'
 workspace_id = '50712d76-ef35-4ba8-948b-aaca27062a90'
