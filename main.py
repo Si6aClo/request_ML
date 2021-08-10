@@ -5,15 +5,15 @@ import json
 # Ссылка для получения токена авторизации
 url = "https://api.aicloud.sbercloud.ru/public/v2/auth"
 # Ссылка для получения ответа от нейросети
-url_predict = "https://api.aicloud.sbercloud.ru/public/v2/inference/v1/predict/kfserving-1628088658/kfserving-1628088658/"
+url_predict = "YOUR-URL-FOR-PREDICT"
 
 # Данные из workspace
-api_key = 'cf0dede4-c3a2-421e-a848-f96ab2605d41'
-workspace_id = '50712d76-ef35-4ba8-948b-aaca27062a90'
+api_key = 'YOUR-API-KEY'
+workspace_id = 'YOUR-WORKSPACE-ID'
 
 # Почта и пароль от sber-cloud
-email = "sevaaa00@gmail.com"
-password = "Aquatech102104$$"
+email = "YOUR-EMAIL"
+password = "YOUR-PASSWORD"
 
 # Подготавливаем данные тела запроса
 payload = json.dumps({
