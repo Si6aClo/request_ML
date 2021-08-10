@@ -1,101 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+// Инициализация curl запроса
+$curl = curl_init();
 
-<body>
-    <?php
+// Ссылка для получения токена
+$url = 'https://api.aicloud.sbercloud.ru/public/v2/auth';
 
-    $curl = curl_init();
+// Установка настроек запроса
+curl_setopt_array($curl, array(
+    CURLOPT_URL => $url, // Указываем ссылку
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => '',
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 0, // Максимальное время ожидания ответа, при 0 неограниченное время
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => 'POST', // POST запрос
+    CURLOPT_POSTFIELDS => '{
+    "email": "YOUR-EMAIL",
+    "password": "YOUR-PASSWORD"
+    }', // Указание email и password
+    CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/json'
+    ), // Указываем Content-Type
+));
 
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://api.aicloud.sbercloud.ru/public/v2/auth',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => '{
-        "email": "sevaaa00@gmail.com",
-        "password": "Aquatech102104$$"
-        }',
-        CURLOPT_HTTPHEADER => array(
-            'Content-Type: application/json'
-        ),
-    ));
+// Получение запроса
+$response = curl_exec($curl);
 
-    $response = curl_exec($curl);
+// Закрытие сессии
+curl_close($curl);
 
-    curl_close($curl);
+// Ответ возвращается строкой, поэтому выцепляем токен с помощью регулярных выражений
+preg_match_all('/"access_token":"[^"]*/', $response, $data);
+$token_str = $data[0];
+$token = $token_str[0];
+$token = preg_replace('/"access_token":"/', '', $token);
 
-    preg_match_all('/"access_token":"[^"]*/', $response, $data);
-    $token_str = $data[0];
-    $token = $token_str[0];
-    $token = preg_replace('/"access_token":"/', '', $token);
+// Инициализируем новую сессию
+$curl_predict = curl_init();
 
+// Ссылка для нейронки
+$url_predict = 'YOUR-URL-FOR-PREDICT';
 
-    $curl_predict = curl_init();
+// Из параметров разработчика
+$api_key = 'YOUR-API-KEY';
+$workspace_id = 'YOUR-WORKSPACE-ID';
 
-    $url_predict = 'https://api.aicloud.sbercloud.ru/public/v2/inference/v1/predict/kfserving-1628088658/kfserving-1628088658/';
+curl_setopt_array($curl_predict, array(
+    CURLOPT_URL => $url_predict,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => '',
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 0,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => 'POST',
+    CURLOPT_POSTFIELDS => '{
+        "instances": [
+                {
+                    "records": {
+                        "PassengerId": [1],
+                        "Pclass": [3],
+                        "Name": ["Braund, Mr. Owen Harris"],
+                        "Sex": ["male"],
+                        "Age": [22],
+                        "SibSp": [1],
+                        "Parch": ["0"],
+                        "Ticket": ["A/5 21171"],
+                        "Fare": ["7.25"],
+                        "Cabin": [""],
+                        "Embarked": ["S"]
+                    }
+                }
+            ]
+        }', // Добавляем данные, про них написано в страничке про python
+    CURLOPT_HTTPHEADER => array(
+        'Content-Type: application/json',
+        'x-api-key: ' . $api_key,
+        'Authorization: ' . $token,
+        'x-workspace-id: ' . $workspace_id
+    ), // Конкатенацией делаем поля в header запроса
+));
 
-    $api_key = 'cf0dede4-c3a2-421e-a848-f96ab2605d41';
-    $workspace_id = '50712d76-ef35-4ba8-948b-aaca27062a90';
+// Получаем predict
+$predict = curl_exec($curl_predict);
 
-    curl_setopt_array($curl_predict, array(
-        CURLOPT_URL => $url_predict,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => '{
-"instances": [
-        {
-            "records": {
-                "PassengerId": [1],
-                "Pclass": [3],
-                "Name": ["Braund, Mr. Owen Harris"],
-                "Sex": ["male"],
-                "Age": [22],
-                "SibSp": [1],
-                "Parch": ["0"],
-                "Ticket": ["A/5 21171"],
-                "Fare": ["7.25"],
-                "Cabin": [""],
-                "Embarked": ["S"]
-            }
+//Закрываем сессию
+curl_close($curl_predict);
 
-        }
-    ]
-}',
-        CURLOPT_HTTPHEADER => array(
-            'Content-Type: application/json',
-            'x-api-key: ' . $api_key,
-            'Authorization: ' . $token,
-            'x-workspace-id: ' . $workspace_id
-        ),
-    ));
-
-    $predict = curl_exec($curl_predict);
-
-    curl_close($curl_predict);
-
-    preg_match_all('/\[\[[^"]*\]\]/', $predict, $data_predict);
-    $predict_str = $data_predict[0];
-    $predict_value = $predict_str[0];
-    $predict_value = preg_replace('/\[/', '', $predict_value);
-    $predict_value = preg_replace('/\]/', '', $predict_value);
-    echo $predict_value;
-    ?>
-</body>
-
-</html>
+// Опять же с помощью регулярных выражений получаем ответ
+preg_match_all('/\[\[[^"]*\]\]/', $predict, $data_predict);
+$predict_str = $data_predict[0];
+$predict_value = $predict_str[0];
+$predict_value = preg_replace('/\[/', '', $predict_value);
+$predict_value = preg_replace('/\]/', '', $predict_value);
+// Вывод ответа
+echo $predict_value;
+?>
